@@ -18,7 +18,7 @@ PRESET = "medium"
 TIME_LIMIT = 600
 
 # Toggle feature engineering on/off for benchmarking
-USE_ENGINEERED_FEATURES = True
+USE_ENGINEERED_FEATURES = False
 
 
 class InteractionFeatureGenerator(AbstractFeatureGenerator):
