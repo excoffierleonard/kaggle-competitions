@@ -2,7 +2,6 @@
 
 import zipfile
 
-import numpy as np
 from pandas import DataFrame
 from autogluon.tabular import TabularDataset, TabularPredictor
 from kaggle.api.kaggle_api_extended import KaggleApi
@@ -10,44 +9,10 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 COMPETITION = "playground-series-s6e1"
 TARGET = "exam_score"
 
-USE_ENGINEERED_FEATURES = False
-FAST_MODE = True
-
 PRESET = "high_v150"
-TIME_LIMIT = 600
+TIME_LIMIT = None
 
 SUBMIT = False
-
-
-def engineer_features(df: DataFrame) -> DataFrame:
-    """Create interaction, polynomial, and ratio features.
-
-    AutoGluon automatically handles:
-    - Categorical encoding (maps to integers)
-    - Missing values
-    - Datetime expansion
-
-    This function adds what AutoGluon does NOT create:
-    - Numerical interactions
-    - Polynomial features
-    - Ratio features
-    """
-    df = df.copy()
-
-    # Interaction features (numerical * numerical)
-    df["study_attend"] = df["study_hours"] * df["class_attendance"]
-    df["study_sleep"] = df["study_hours"] * df["sleep_hours"]
-
-    # Polynomial features
-    df["study_hours_sq"] = df["study_hours"] ** 2
-    df["attendance_sq"] = df["class_attendance"] ** 2
-    df["study_attend_sqrt"] = np.sqrt(df["study_attend"])
-
-    # Ratio features
-    df["study_per_sleep"] = df["study_hours"] / (df["sleep_hours"] + 0.1)
-    df["efficiency"] = df["study_attend"] / (df["study_hours"] + 0.1)
-
-    return df
 
 
 def download_data() -> None:
@@ -75,18 +40,12 @@ def train_model(train: DataFrame) -> TabularPredictor:
         eval_metric="rmse",
     )
 
-    if FAST_MODE:
-        predictor.fit(
-            train,
-            hyperparameters={"CAT": {}},
-            time_limit=60,
-        )
-    else:
-        predictor.fit(
-            train,
-            presets=PRESET,
-            time_limit=TIME_LIMIT,
-        )
+    predictor.fit(
+        train,
+        presets=PRESET,
+        time_limit=TIME_LIMIT,
+    )
+
     return predictor
 
 
@@ -102,12 +61,10 @@ def main() -> None:
     download_data()
     train, test, sub = load_data()
 
-    if USE_ENGINEERED_FEATURES:
-        train = engineer_features(train)
-        test = engineer_features(test)
-
+    # Train model
     predictor = train_model(train)
 
+    # Evaluate
     print(predictor.leaderboard())
     print(predictor.feature_importance(train))
 
