@@ -54,7 +54,7 @@ def train_model(train: DataFrame) -> TabularPredictor:
     return predictor
 
 
-def submit_to_kaggle():
+def submit_to_kaggle() -> None:
     """Submit the generated submission file to Kaggle."""
     kaggle.api.competition_submit(
         "data/submission.csv", "AutoGluon Pipeline", COMPETITION

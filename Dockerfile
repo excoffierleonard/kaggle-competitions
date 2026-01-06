@@ -4,6 +4,7 @@ ARG KAGGLE_API_TOKEN
 ENV KAGGLE_API_TOKEN=$KAGGLE_API_TOKEN
 ENV PATH="/root/.local/bin:$PATH"
 ENV PYTHONPATH="/app"
+ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
 RUN apt update && apt install -y \
