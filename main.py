@@ -1,5 +1,7 @@
 """AutoGluon pipeline for Kaggle Playground S6E1."""
 
+import os
+import time
 import zipfile
 
 from dotenv import load_dotenv
@@ -13,10 +15,12 @@ from autogluon.tabular import TabularDataset, TabularPredictor
 COMPETITION = "playground-series-s6e1"
 TARGET = "exam_score"
 
-PRESET = "high_v150"
-TIME_LIMIT = None
+PRESETS = os.getenv("PRESETS", "") or "high_v150"
+TIME_LIMIT = (
+    int(v) if (v := os.getenv("TIME_LIMIT", "")).isdigit() and int(v) > 0 else None
+)
 
-SUBMIT = False
+SUBMIT = os.getenv("SUBMIT", "").lower() == "true"
 
 
 def download_data() -> None:
@@ -43,7 +47,7 @@ def train_model(train: DataFrame) -> TabularPredictor:
     )
     predictor.fit(
         train,
-        presets=PRESET,
+        presets=PRESETS,
         time_limit=TIME_LIMIT,
     )
 
@@ -59,6 +63,14 @@ def submit_to_kaggle():
 
 def main() -> None:
     """Main entry point."""
+    start_time = time.time()
+
+    # Settings
+    print(f"Preset: {PRESETS}")
+    print(f"Time limit: {TIME_LIMIT}")
+    print(f"Submit: {SUBMIT}\n")
+
+    # Download & load data
     download_data()
     train, test, sub = load_data()
 
@@ -78,7 +90,8 @@ def main() -> None:
     if SUBMIT:
         submit_to_kaggle()
 
-    print("Done!")
+    elapsed = time.time() - start_time
+    print(f"Done! ({elapsed:.2f}s)")
 
 
 if __name__ == "__main__":

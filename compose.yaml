@@ -7,3 +7,6 @@ services:
     image: kagglecomp-pgs06e01:latest
     environment:
       KAGGLE_API_TOKEN: ${KAGGLE_API_TOKEN}
+      PRESETS: ${PRESETS:-}
+      TIME_LIMIT: ${TIME_LIMIT:-}
+      SUBMIT: ${SUBMIT:-}
