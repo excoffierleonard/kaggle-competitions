@@ -4,11 +4,6 @@ import zipfile
 
 import numpy as np
 from pandas import DataFrame
-from autogluon.common.features.types import R_FLOAT, R_INT
-from autogluon.features.generators import (
-    AbstractFeatureGenerator,
-    AutoMLPipelineFeatureGenerator,
-)
 from autogluon.tabular import TabularDataset, TabularPredictor
 from kaggle.api.kaggle_api_extended import KaggleApi
 
@@ -18,49 +13,41 @@ TARGET = "exam_score"
 USE_ENGINEERED_FEATURES = False
 FAST_MODE = False
 
-PRESET = "best_v150"
+PRESET = "high_v150"
 TIME_LIMIT = 600
 
+SUBMIT = False
 
-class InteractionFeatureGenerator(AbstractFeatureGenerator):
-    """Custom feature generator for interaction, polynomial, and ratio features.
+
+def engineer_features(df: DataFrame) -> DataFrame:
+    """Create interaction, polynomial, and ratio features.
 
     AutoGluon automatically handles:
     - Categorical encoding (maps to integers)
     - Missing values
     - Datetime expansion
 
-    This generator adds what AutoGluon does NOT create:
+    This function adds what AutoGluon does NOT create:
     - Numerical interactions
     - Polynomial features
     - Ratio features
     """
+    df = df.copy()
 
-    def _fit_transform(self, X: DataFrame, **kwargs) -> tuple[DataFrame, dict]:
-        X_out = self._transform(X)
-        return X_out, self.feature_metadata_in.type_group_map_special
+    # Interaction features (numerical * numerical)
+    df["study_attend"] = df["study_hours"] * df["class_attendance"]
+    df["study_sleep"] = df["study_hours"] * df["sleep_hours"]
 
-    def _transform(self, X: DataFrame) -> DataFrame:
-        X = X.copy()
+    # Polynomial features
+    df["study_hours_sq"] = df["study_hours"] ** 2
+    df["attendance_sq"] = df["class_attendance"] ** 2
+    df["study_attend_sqrt"] = np.sqrt(df["study_attend"])
 
-        # Interaction features (numerical * numerical)
-        X["study_attend"] = X["study_hours"] * X["class_attendance"]
-        X["study_sleep"] = X["study_hours"] * X["sleep_hours"]
+    # Ratio features
+    df["study_per_sleep"] = df["study_hours"] / (df["sleep_hours"] + 0.1)
+    df["efficiency"] = df["study_attend"] / (df["study_hours"] + 0.1)
 
-        # Polynomial features
-        X["study_hours_sq"] = X["study_hours"] ** 2
-        X["attendance_sq"] = X["class_attendance"] ** 2
-        X["study_attend_sqrt"] = np.sqrt(X["study_attend"])
-
-        # Ratio features
-        X["study_per_sleep"] = X["study_hours"] / (X["sleep_hours"] + 0.1)
-        X["efficiency"] = X["study_attend"] / (X["study_hours"] + 0.1)
-
-        return X
-
-    @staticmethod
-    def get_default_infer_features_in_args() -> dict:
-        return {"valid_raw_types": [R_FLOAT, R_INT]}
+    return df
 
 
 def download_data() -> None:
@@ -80,16 +67,8 @@ def load_data() -> tuple[DataFrame, DataFrame, DataFrame]:
     return train, test, sub
 
 
-def create_feature_generator() -> AutoMLPipelineFeatureGenerator | None:
-    """Create the feature generator based on toggle."""
-    if not USE_ENGINEERED_FEATURES:
-        return None
-    return AutoMLPipelineFeatureGenerator(
-        pre_generators=[InteractionFeatureGenerator(verbosity=0)]
-    )
-
-
-def train_model(train: DataFrame, feature_generator) -> TabularPredictor:
+def train_model(train: DataFrame) -> TabularPredictor:
+    """Train the AutoGluon predictor."""
     predictor = TabularPredictor(
         label=TARGET,
         problem_type="regression",
@@ -99,14 +78,12 @@ def train_model(train: DataFrame, feature_generator) -> TabularPredictor:
     if FAST_MODE:
         predictor.fit(
             train,
-            feature_generator=feature_generator,
             hyperparameters={"GBM": {}},
             time_limit=60,
         )
     else:
         predictor.fit(
             train,
-            feature_generator=feature_generator,
             presets=PRESET,
             time_limit=TIME_LIMIT,
         )
@@ -125,10 +102,11 @@ def main() -> None:
     download_data()
     train, test, sub = load_data()
 
-    feature_generator = create_feature_generator()
-    print(f"Feature engineering: {'ON' if USE_ENGINEERED_FEATURES else 'OFF'}")
+    if USE_ENGINEERED_FEATURES:
+        train = engineer_features(train)
+        test = engineer_features(test)
 
-    predictor = train_model(train, feature_generator)
+    predictor = train_model(train)
 
     print(predictor.leaderboard())
     print(predictor.feature_importance(train))
@@ -139,7 +117,8 @@ def main() -> None:
     sub.to_csv("data/submission.csv", index=False)
 
     # Submit
-    # submit_to_kaggle()
+    if SUBMIT:
+        submit_to_kaggle()
 
     print("Done!")
 
