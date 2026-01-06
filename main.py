@@ -70,6 +70,10 @@ def main() -> None:
     print(f"TIME_LIMIT: {TIME_LIMIT}")
     print(f"SUBMIT: {SUBMIT}\n")
 
+    # Environment info
+    print("CPU Count:", os.cpu_count())
+    print("Available GPUs:", os.getenv("CUDA_VISIBLE_DEVICES", "None"), "\n")
+
     # Download & load data
     download_data()
     train, test, sub = load_data()
