@@ -66,9 +66,9 @@ def main() -> None:
     start_time = time.time()
 
     # Settings
-    print(f"Preset: {PRESETS}")
-    print(f"Time limit: {TIME_LIMIT}")
-    print(f"Submit: {SUBMIT}\n")
+    print(f"PRESETS: {PRESETS}")
+    print(f"TIME_LIMIT: {TIME_LIMIT}")
+    print(f"SUBMIT: {SUBMIT}\n")
 
     # Download & load data
     download_data()
