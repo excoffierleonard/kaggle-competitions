@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        - KAGGLE_API_TOKEN=${KAGGLE_API_TOKEN}
+    image: kagglecomp-pgs06e01:latest
+    environment:
+      KAGGLE_API_TOKEN: ${KAGGLE_API_TOKEN}
