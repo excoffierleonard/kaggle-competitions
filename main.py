@@ -2,9 +2,13 @@
 
 import zipfile
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+import kaggle
 from pandas import DataFrame
 from autogluon.tabular import TabularDataset, TabularPredictor
-from kaggle.api.kaggle_api_extended import KaggleApi
 
 COMPETITION = "playground-series-s6e1"
 TARGET = "exam_score"
@@ -17,9 +21,7 @@ SUBMIT = False
 
 def download_data() -> None:
     """Download competition data from Kaggle."""
-    api = KaggleApi()
-    api.authenticate()
-    api.competition_download_files(COMPETITION, path="data")
+    kaggle.api.competition_download_files(COMPETITION, path="data")
     with zipfile.ZipFile(f"data/{COMPETITION}.zip", "r") as z:
         z.extractall("data")
 
@@ -39,7 +41,6 @@ def train_model(train: DataFrame) -> TabularPredictor:
         problem_type="regression",
         eval_metric="rmse",
     )
-
     predictor.fit(
         train,
         presets=PRESET,
@@ -51,9 +52,9 @@ def train_model(train: DataFrame) -> TabularPredictor:
 
 def submit_to_kaggle():
     """Submit the generated submission file to Kaggle."""
-    api = KaggleApi()
-    api.authenticate()
-    api.competition_submit("data/submission.csv", "AutoGluon Pipeline", COMPETITION)
+    kaggle.api.competition_submit(
+        "data/submission.csv", "AutoGluon Pipeline", COMPETITION
+    )
 
 
 def main() -> None:
