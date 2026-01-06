@@ -11,7 +11,7 @@ COMPETITION = "playground-series-s6e1"
 TARGET = "exam_score"
 
 USE_ENGINEERED_FEATURES = False
-FAST_MODE = False
+FAST_MODE = True
 
 PRESET = "high_v150"
 TIME_LIMIT = 600
@@ -78,7 +78,7 @@ def train_model(train: DataFrame) -> TabularPredictor:
     if FAST_MODE:
         predictor.fit(
             train,
-            hyperparameters={"GBM": {}},
+            hyperparameters={"CAT": {}},
             time_limit=60,
         )
     else:
