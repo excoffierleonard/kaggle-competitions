@@ -92,7 +92,7 @@ def train_model(train: DataFrame, feature_generator) -> TabularPredictor:
     """Train the AutoGluon predictor."""
     predictor = TabularPredictor(
         label=TARGET,
-        preset=PRESET,
+        presets=PRESET,
         problem_type="regression",
         eval_metric="rmse",
     )
