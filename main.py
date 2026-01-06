@@ -16,8 +16,6 @@ COMPETITION = "playground-series-s6e1"
 TARGET = "exam_score"
 PRESET = "medium"
 TIME_LIMIT = 600
-
-# Toggle feature engineering on/off for benchmarking
 USE_ENGINEERED_FEATURES = False
 
 
@@ -92,14 +90,14 @@ def train_model(train: DataFrame, feature_generator) -> TabularPredictor:
     """Train the AutoGluon predictor."""
     predictor = TabularPredictor(
         label=TARGET,
-        presets=PRESET,
         problem_type="regression",
         eval_metric="rmse",
     )
     predictor.fit(
         train,
-        feature_generator=feature_generator,
+        presets=PRESET,
         time_limit=TIME_LIMIT,
+        feature_generator=feature_generator,
     )
     return predictor
 
