@@ -15,7 +15,7 @@ from autogluon.tabular import TabularDataset, TabularPredictor
 COMPETITION = "playground-series-s6e1"
 TARGET = "exam_score"
 
-PRESETS = os.getenv("PRESETS", "") or "high_v150"
+PRESETS = os.getenv("PRESETS", "") or "extreme"
 TIME_LIMIT = (
     int(v) if (v := os.getenv("TIME_LIMIT", "")).isdigit() and int(v) > 0 else None
 )
