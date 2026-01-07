@@ -1637,7 +1637,7 @@ wheels = [
 ]
 
 [[package]]
-name = "kagglecomp-pgs06e01"
+name = "kaggle-competitions"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

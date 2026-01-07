@@ -5,7 +5,7 @@ services:
       context: .
       args:
         - KAGGLE_API_TOKEN=${KAGGLE_API_TOKEN}
-    image: excoffierleonard/kagglecomp-pgs06e01:latest
+    image: ghcr.io/excoffierleonard/kaggle-competitions:latest
     environment:
       KAGGLE_API_TOKEN: ${KAGGLE_API_TOKEN}
       PRESETS: ${PRESETS:-}

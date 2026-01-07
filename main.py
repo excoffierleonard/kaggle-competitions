@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import kaggle
+import torch
 from pandas import DataFrame
 from autogluon.tabular import TabularDataset, TabularPredictor
 
@@ -71,8 +72,10 @@ def main() -> None:
     print(f"SUBMIT: {SUBMIT}\n")
 
     # Environment info
-    print("CPU Count:", os.cpu_count())
-    print("Available GPUs:", os.getenv("CUDA_VISIBLE_DEVICES", "None"), "\n")
+    print(f"CPU Count: {os.cpu_count()}")
+    print(
+        f"GPUs: {[torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())] or 'None'}\n"
+    )
 
     # Download & load data
     download_data()
