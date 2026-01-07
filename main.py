@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import kaggle
-import torch
 from pandas import DataFrame
 from autogluon.tabular import TabularDataset, TabularPredictor
 
@@ -50,8 +49,8 @@ def train_model(train: DataFrame) -> TabularPredictor:
         train,
         presets=PRESETS,
         time_limit=TIME_LIMIT,
-        num_cpus=os.cpu_count(),
-        num_gpus=torch.cuda.device_count(),
+        # We exclude Neural Net models due to training dataset size
+        excluded_model_types=["TABDPT", "TABICL", "MITRA", "TABM", "REALTABPFN-V2"],
     )
 
     return predictor
@@ -72,12 +71,6 @@ def main() -> None:
     print(f"PRESETS: {PRESETS}")
     print(f"TIME_LIMIT: {TIME_LIMIT}")
     print(f"SUBMIT: {SUBMIT}\n")
-
-    # Environment info
-    print(f"CPU Count: {os.cpu_count()}")
-    print(
-        f"GPUs: {[torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())] or 'None'}\n"
-    )
 
     # Download & load data
     download_data()
