@@ -50,6 +50,7 @@ def train_model(train: DataFrame) -> TabularPredictor:
         train,
         presets=PRESETS,
         time_limit=TIME_LIMIT,
+        num_cpus=os.cpu_count(),
         num_gpus=torch.cuda.device_count(),
     )
 
